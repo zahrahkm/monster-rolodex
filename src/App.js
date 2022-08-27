@@ -1,38 +1,42 @@
-import React,{ Component } from "react";
+import React, {useEffect, useState} from "react";
 import './App.css';
 import {CardList} from "./components/card-list/card-list.component";
 import {SearchBox} from "./components/search-box/search-box.component";
 
-class App extends Component{
-    constructor() {
-        super();
-        this.state={
-            monsters:[
-            ],
-            searchField:''
-        };
-    }
-    componentDidMount() {
+const App =()=> {
+    console.log('render')
+    const [monsters, setMonsters] = useState([]);
+    const [searchField, setSearchField] = useState("");
+    const [filterMonsters,setFilterMonsters]=useState(monsters)
+
+/////////////useEffect///////////
+
+    useEffect(()=>{
+        console.log('effect fired')
         fetch('https://jsonplaceholder.typicode.com/users')
             .then(response=>response.json())
-            .then(users=>this.setState({monsters:users}))
+            .then(users=>setMonsters(users))
+    },[])
 
-    }
-    handelChange=(e)=>{this.setState({searchField : e.target.value})}
+    useEffect(()=>{
+        const newFilterMonsters=monsters.filter(monster =>{
+            return monster.name.toLowerCase().includes(searchField.toLowerCase())
+        });
+        setFilterMonsters(newFilterMonsters);
+
+    },[monsters,searchField])
+
+//////////////////////    ///////////////////
+    const handelChange=(e)=>{setSearchField( e.target.value.toLowerCase())}
 
 
-    render() {
-        const { monsters , searchField}=this.state;
-        const filterMonsters =monsters.filter(monster =>
-            monster.name.toLowerCase().includes(searchField.toLowerCase()));
-        return (
-            <div className="App">
-                <h1>Monster Rolodex</h1>
-                <SearchBox placeholder='search monster' handelChange={this.handelChange}/>
-                <CardList monsters={filterMonsters}/>
-            </div>
-        );
-    }
-  }
+    return (
+        <div className="App">
+            <h1>Monster Rolodex</h1>
+            <SearchBox placeholder='search monster' handelChange={handelChange}/>
+            <CardList monsters={filterMonsters}/>
+        </div>
+    );
+}
 
 export default App;
